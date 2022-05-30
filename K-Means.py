@@ -1,6 +1,13 @@
 import numpy
 import matplotlib.pyplot as plt
 
+def unpickle(file):
+    """Needed for loading the cifar data"""
+    import pickle
+    with open(file, 'rb') as fo:
+        dict = pickle.load(fo, encoding='bytes')
+    return dict
+
 class Kmeans():
     def __init__(self, k, rounds, data):
         self.testing_data = data
