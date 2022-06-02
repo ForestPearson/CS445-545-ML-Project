@@ -1,7 +1,11 @@
 import numpy as np
 from sklearn.metrics import confusion_matrix
 
-HIDDENUNITS = 100
+HIDDENUNITS = 175
+HIDDEN2 = 150
+HIDDEN3 = 125
+HIDDEN4 = 100
+HIDDEN5 = 75
 LEARNINGRATE = 0.01
 EPOCHS = 100
 MOMENTUM = 0.9
@@ -113,10 +117,6 @@ def runEpoch(learningRate, momentum, training, inToHidden, hiddenTo2, hiddenTo3,
     return (totalCorrect / len(trainData)) * 100, inToHidden, hiddenTo2, hiddenTo3, hiddenTo4, hiddenTo5, hiddenToOut, prevIn, prev2, prev3, prev4, prev5, prevOut
 
 def experiment1():
-    #inToHidden = randWeightMatrix(3073, HIDDENUNITS + 1)
-    #hiddenToOut = randWeightMatrix(HIDDENUNITS + 1, 10)
-    #global inToHidden, hiddenTo2, hiddenTo3, hiddenTo4, hiddenTo5, hiddenToOut
-    #global prevIn, prevOut, prev2, prev3, prev4, prev5
     inToHidden = randWeightMatrix(3073, HIDDENUNITS + 1)
     hiddenTo2 = randWeightMatrix(HIDDENUNITS + 1, HIDDEN2 + 1)
     hiddenTo3 = randWeightMatrix(HIDDEN2 + 1, HIDDEN3 + 1)
@@ -124,12 +124,12 @@ def experiment1():
     hiddenTo5 = randWeightMatrix(HIDDEN4 + 1, HIDDEN5 + 1)
     hiddenToOut = randWeightMatrix(HIDDEN5 + 1, 10)
 
-    prevIn = np.zeros((1, HIDDENUNITS + 1))
-    prev2 = np.zeros((1, HIDDEN2 + 1))
-    prev3 = np.zeros((1, HIDDEN3 + 1))
-    prev4 = np.zeros((1, HIDDEN4 + 1))
-    prev5 = np.zeros((1, HIDDEN5 + 1))
-    prevOut = np.zeros((1, 10))
+    prevIn = np.zeros((3073, HIDDENUNITS + 1))
+    prev2 = np.zeros((HIDDENUNITS+1, HIDDEN2 + 1))
+    prev3 = np.zeros((HIDDEN2+1, HIDDEN3 + 1))
+    prev4 = np.zeros((HIDDEN3+1, HIDDEN4 + 1))
+    prev5 = np.zeros((HIDDEN4+1, HIDDEN5 + 1))
+    prevOut = np.zeros((HIDDEN5+1, 10))
     
     for i in range(0, EPOCHS):
         accuracy, inToHidden, hiddenTo2, hiddenTo3, hiddenTo4, hiddenTo5, hiddenToOut, prevIn, prev2, prev3, prev4, prev5, prevOut = runEpoch(LEARNINGRATE, MOMENTUM, True, inToHidden, hiddenTo2, hiddenTo3, hiddenTo4, hiddenTo5, hiddenToOut, prevIn, prev2, prev3, prev4, prev5, prevOut)
