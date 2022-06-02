@@ -40,7 +40,7 @@ def randWeightMatrix(n,m):
         weightMatrix.append(randWeights(m))
     return weightMatrix
 
-def runEpoch(inToHidden, hiddenToOut, prevIn, prevOut, learningRate, momentum, training):
+def runEpoch(learningRate, momentum, training, inToHidden, hiddenTo2, hiddenTo3, hiddenTo4, hiddenTo5, hiddenToOut, prevIn, prev2, prev3, prev4, prev5, prevOut):
     totalCorrect = 0
     
     for i in range(0, len(trainData)):
@@ -52,11 +52,20 @@ def runEpoch(inToHidden, hiddenToOut, prevIn, prevOut, learningRate, momentum, t
         # Forward Propagation
         hiddenInputs = np.dot(inputs, inToHidden)
         hiddenOutputs = sigmoid(hiddenInputs)
-        #hiddenOutputs = np.insert(hiddenOutputs, [0], [BIAS], axis=1)
         
-        #hiddenOutputs = hiddenOutputs.reshape(1, len(hiddenOutputs[0]))
+        hidden2Inputs = np.dot(hiddenOutputs, hiddenTo2)
+        hidden2Outputs = sigmoid(hidden2Inputs)
 
-        outInputs = np.dot(hiddenOutputs, hiddenToOut)
+        hidden3Inputs = np.dot(hidden2Outputs, hiddenTo3)
+        hidden3Outputs = sigmoid(hidden3Inputs)
+
+        hidden4Inputs = np.dot(hidden3Outputs, hiddenTo4)
+        hidden4Outputs = sigmoid(hidden4Inputs)
+
+        hidden5Inputs = np.dot(hidden4Outputs, hiddenTo5)
+        hidden5Outputs = sigmoid(hidden5Inputs)
+
+        outInputs = np.dot(hidden5Outputs, hiddenToOut)
         outputs = sigmoid(outInputs)
         #outputs = outputs.reshape(1, len(outputs[0]))
 
@@ -69,30 +78,61 @@ def runEpoch(inToHidden, hiddenToOut, prevIn, prevOut, learningRate, momentum, t
             totalCorrect += 1
         if training:
             outputError = outputs * (1 - outputs) * (targetOutputs - outputs)
-            hiddenError = hiddenOutputs * (1 - hiddenOutputs) * np.dot(outputError, np.transpose(hiddenToOut))
-            
-            deltaInput = (learningRate * hiddenError * (inputs.T)) + (momentum * prevIn)
-            prevIn = deltaInput
-            inToHidden += deltaInput
-            
-            deltaHidden = (learningRate * (outputError * np.transpose(hiddenOutputs))) + (momentum * prevOut)
-            prevOut = deltaHidden
-            hiddenToOut += deltaHidden
+            hidden5Error = hidden5Outputs * (1 - hidden5Outputs) * np.dot(outputError, np.transpose(hiddenToOut))
+            hidden4Error = hidden4Outputs * (1 - hidden4Outputs) * np.dot(hidden5Error, np.transpose(hiddenTo5))
+            hidden3Error = hidden3Outputs * (1 - hidden3Outputs) * np.dot(hidden4Error, np.transpose(hiddenTo4))
+            hidden2Error = hidden2Outputs * (1 - hidden2Outputs) * np.dot(hidden3Error, np.transpose(hiddenTo3))
+            hiddenError = hiddenOutputs * (1 - hiddenOutputs) * np.dot(hidden2Error, np.transpose(hiddenTo2))
+            #inError = inputs * (1 - inputs) * np.dot(hiddenError, np.transpose(inToHidden))
+
+            # Update Weights
+            deltaInputToHidden = learningRate * np.dot(np.transpose(inputs), hiddenError) + momentum * prevIn
+            deltaHiddenTo2 = learningRate * np.dot(np.transpose(hiddenOutputs), hidden2Error) + momentum * prev2
+            deltaHiddenTo3 = learningRate * np.dot(np.transpose(hidden2Outputs), hidden3Error) + momentum * prev3
+            deltaHiddenTo4 = learningRate * np.dot(np.transpose(hidden3Outputs), hidden4Error) + momentum * prev4
+            deltaHiddenTo5 = learningRate * np.dot(np.transpose(hidden4Outputs), hidden5Error) + momentum * prev5
+            deltaHiddenToOut = learningRate * np.dot(np.transpose(hidden5Outputs), outputError) + momentum * prevOut
+
+            inToHidden += deltaInputToHidden
+            prevIn = deltaInputToHidden
+            hiddenTo2 += deltaHiddenTo2
+            prev2 = deltaHiddenTo2
+            hiddenTo3 += deltaHiddenTo3
+            prev3 = deltaHiddenTo3
+            hiddenTo4 += deltaHiddenTo4
+            prev4 = deltaHiddenTo4
+            hiddenTo5 += deltaHiddenTo5
+            prev5 = deltaHiddenTo5
+            hiddenToOut += deltaHiddenToOut
+            prevOut = deltaHiddenToOut
         
         else:
             testingConfusionLabels.append(label)
             testingConfusionResults.append(prediction)
     
-    return (totalCorrect / len(trainData)) * 100, inToHidden, hiddenToOut, prevIn, prevOut
+    return (totalCorrect / len(trainData)) * 100, inToHidden, hiddenTo2, hiddenTo3, hiddenTo4, hiddenTo5, hiddenToOut, prevIn, prev2, prev3, prev4, prev5, prevOut
 
 def experiment1():
+    #inToHidden = randWeightMatrix(3073, HIDDENUNITS + 1)
+    #hiddenToOut = randWeightMatrix(HIDDENUNITS + 1, 10)
+    #global inToHidden, hiddenTo2, hiddenTo3, hiddenTo4, hiddenTo5, hiddenToOut
+    #global prevIn, prevOut, prev2, prev3, prev4, prev5
     inToHidden = randWeightMatrix(3073, HIDDENUNITS + 1)
-    hiddenToOut = randWeightMatrix(HIDDENUNITS + 1, 10)
-    prevIn = np.zeros((3073, HIDDENUNITS + 1))
-    prevOut = np.zeros((HIDDENUNITS + 1, 10))
+    hiddenTo2 = randWeightMatrix(HIDDENUNITS + 1, HIDDEN2 + 1)
+    hiddenTo3 = randWeightMatrix(HIDDEN2 + 1, HIDDEN3 + 1)
+    hiddenTo4 = randWeightMatrix(HIDDEN3 + 1, HIDDEN4 + 1)
+    hiddenTo5 = randWeightMatrix(HIDDEN4 + 1, HIDDEN5 + 1)
+    hiddenToOut = randWeightMatrix(HIDDEN5 + 1, 10)
+
+    prevIn = np.zeros((1, HIDDENUNITS + 1))
+    prev2 = np.zeros((1, HIDDEN2 + 1))
+    prev3 = np.zeros((1, HIDDEN3 + 1))
+    prev4 = np.zeros((1, HIDDEN4 + 1))
+    prev5 = np.zeros((1, HIDDEN5 + 1))
+    prevOut = np.zeros((1, 10))
     
     for i in range(0, EPOCHS):
-        accuracy, inToHidden, hiddenToOut, prevIn, prevOut = runEpoch(inToHidden, hiddenToOut, prevIn, prevOut, LEARNINGRATE, MOMENTUM, True)
+        accuracy, inToHidden, hiddenTo2, hiddenTo3, hiddenTo4, hiddenTo5, hiddenToOut, prevIn, prev2, prev3, prev4, prev5, prevOut = runEpoch(LEARNINGRATE, MOMENTUM, True, inToHidden, hiddenTo2, hiddenTo3, hiddenTo4, hiddenTo5, hiddenToOut, prevIn, prev2, prev3, prev4, prev5, prevOut)
         print("Epoch: " + str(i) + " Accuracy: " + str(accuracy))
     print(confusion_matrix(testingConfusionLabels, testingConfusionResults))
 
