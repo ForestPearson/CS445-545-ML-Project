@@ -97,9 +97,9 @@ def printOne(Chosen, label, directory):
     #print(cifarClasses[dataLabel])
 
 def printClass(selected,sample):
-    c = sample
+    c = 0;
     acc = 0;
-    while(c < 10):
+    while(c < sample):
         x = np.random.randint(len(testingConfusionResults))
         if(testingConfusionResults[x] == selected and c < 10):
             label = "Predicted"+str(selected)+"I"+str(c)+"_Class"+str(testingConfusionLabels[x])
@@ -123,7 +123,7 @@ def experiment1():
     prevIn = np.zeros((3073, HIDDENUNITS + 1))
     prevOut = np.zeros((HIDDENUNITS + 1, 10))
 
-    for i in range(0, 2):
+    for i in range(0, 1):
         testingConfusionLabels.clear()
         testingConfusionResults.clear()
         accuracy, inToHidden, hiddenToOut, prevIn, prevOut = runEpoch(inToHidden, hiddenToOut, prevIn, prevOut, LEARNINGRATE, MOMENTUM, True)
