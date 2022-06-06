@@ -1,12 +1,15 @@
 import numpy as np
+import matplotlib.pyplot as plt
 from sklearn.metrics import confusion_matrix
+import sys
+np.set_printoptions(threshold=sys.maxsize)
 
 HIDDENUNITS = 100
 LEARNINGRATE = 0.01
 EPOCHS = 100
 MOMENTUM = 0.9
 BIAS = 1
-
+cifarClasses = ['airplane', 'automobile', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
 dataset1 = np.load('cifar-10-batches-py/data_batch_1', allow_pickle=True, encoding='bytes')
 dataset2 = np.load('cifar-10-batches-py/data_batch_2', allow_pickle=True, encoding='bytes')
 dataset3 = np.load('cifar-10-batches-py/data_batch_3', allow_pickle=True, encoding='bytes')
@@ -84,16 +87,59 @@ def runEpoch(inToHidden, hiddenToOut, prevIn, prevOut, learningRate, momentum, t
             testingConfusionResults.append(prediction)
 
     return (totalCorrect / len(trainData)) * 100, inToHidden, hiddenToOut, prevIn, prevOut
+def printOne(Chosen, label, directory):
+    img = trainData
+    dataLabel = trainLabels[Chosen]
+    img = img.reshape(50000,3,32,32).transpose(0,2,3,1)
+    plt.imshow(img[Chosen:Chosen+1][0])
+    plt.savefig("Results/"+str(directory)+"/"+str(label) + '.png')
+    #print(trainData[0])
+    #print(cifarClasses[dataLabel])
 
+def printClass(selected,sample):
+    c = sample
+    acc = 0;
+    while(c < 10):
+        x = np.random.randint(len(testingConfusionResults))
+        if(testingConfusionResults[x] == selected and c < 10):
+            label = "Predicted"+str(selected)+"I"+str(c)+"_Class"+str(testingConfusionLabels[x])
+            printOne(x,label, selected)
+            c += 1
+            if(testingConfusionLabels[x] == testingConfusionResults[x]):
+                acc += 1
+    #for i in range(0, len(testingConfusionLabels)):
+    #   if(testingConfusionResults[i] == selected and c < 10):
+    #        label = "Predicted"+str(selected)+"I"+str(c)+"_Class"+str(testingConfusionLabels[i])
+    #        printOne(i,label, selected)
+    #        c += 1
+    #        if(testingConfusionLabels[i] == testingConfusionResults[i]):
+    #            acc += 1
+    print("Accuracy for class "+str(selected)+","+str(cifarClasses[selected])+": "+str(acc/c))
+            
 def experiment1():
+    printOne(1, "test", 42)
     inToHidden = randWeightMatrix(3073, HIDDENUNITS + 1)
     hiddenToOut = randWeightMatrix(HIDDENUNITS + 1, 10)
     prevIn = np.zeros((3073, HIDDENUNITS + 1))
     prevOut = np.zeros((HIDDENUNITS + 1, 10))
 
-    for i in range(0, EPOCHS):
+    for i in range(0, 2):
+        testingConfusionLabels.clear()
+        testingConfusionResults.clear()
         accuracy, inToHidden, hiddenToOut, prevIn, prevOut = runEpoch(inToHidden, hiddenToOut, prevIn, prevOut, LEARNINGRATE, MOMENTUM, True)
         print("Epoch: " + str(i) + " Accuracy: " + str(accuracy))
+        accuracy, inToHidden, hiddenToOut, prevIn, prevOut = runEpoch(inToHidden, hiddenToOut, prevIn, prevOut, LEARNINGRATE, MOMENTUM, False)
+        print("Epoch: " + str(i) + " Accuracy: " + str(accuracy))
     print(confusion_matrix(testingConfusionLabels, testingConfusionResults))
-
+    printClass(0,10)
+    printClass(1,10)
+    printClass(2,10)
+    printClass(3,10)
+    printClass(4,10)
+    printClass(5,10)
+    printClass(6,10)
+    printClass(7,10)
+    printClass(8,10)
+    printClass(9,10)
+        
 experiment1() 
