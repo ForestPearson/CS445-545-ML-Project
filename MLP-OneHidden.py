@@ -114,7 +114,7 @@ def printClass(selected,sample):
     #        c += 1
     #        if(testingConfusionLabels[i] == testingConfusionResults[i]):
     #            acc += 1
-    print("Accuracy for class "+str(selected)+","+str(cifarClasses[selected])+": "+str(acc/c))
+    print("Accuracy for class "+str(selected)+", "+str(cifarClasses[selected])+": "+str(acc/c))
             
 def experiment1():
     printOne(1, "test", 42)
