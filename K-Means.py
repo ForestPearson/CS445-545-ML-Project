@@ -1,5 +1,6 @@
 from turtle import color
 import numpy
+import math
 import matplotlib.pyplot as plt
 import pickle
 import os
@@ -67,77 +68,119 @@ class Kmeans():
         color_divided_temp = numpy.trunc(numpy.mean(color_divided, axis=2))
         self.testing_data =color_divided_temp
 
-        self.kValues= self.kValues.reshape(5, 3, 1024)
+        self.kValues= self.kValues.reshape(self.kCount, 3, 1024)
         self.kValues=numpy.trunc(numpy.mean(self.kValues, axis=2))
+
    
         #Running the algorithm for the number of rounds, updating the K values to the mean of each cluster then cluster assignments
         #Keep track of past k values so we can plot the convergence and the final/best k values depending on the square error or however we judge it
        
-        self.rounds = 1
+        #self.rounds = 1
 
         #Then plot.
         for i in range(self.rounds): 
 
-            self.clusters = self.clusterAssignments() # Assign initial clusters
+           
             self.pastK.append(self.kValues) #Storing the initial k values
-
+            self.clusters = self.clusterAssignments() # Assign initial clusters
             #  ~ Needs work 
-            #self.kValues = self.updateK()
+            self.kValues = self.updateK()
 
+            #Judge the quality of the final k values
+
+
+            #Print data
+            print("each image's mean color values : ")
+            print(self.testing_data)
+            print(self.testing_data.shape)
+
+            print("kvalues : ")
+            print(self.kValues)
+            print(self.kValues.shape)
+
+            #output shows a lot of/ all items in the same cluster- maybe once update k will help adjust?
+            print ("clusters from clusterAssignments  :")
+            print(self.clusters) 
+            print(len(self.clusters))
+
+            
             #these scatter plot lines are just for testing until I can get my code working with the preexisting plotter function
             #AKA - can be deleted and replaced w plotter func. later
             plt.scatter(self.testing_data.T[0],self.testing_data.T[1], cmap=plt.get_cmap(name=None, lut=None)) #Assigning colors to the clusters
             plt.scatter(self.kValues.T[0],self.kValues.T[1], c='black')
             plt.show()
       
-          
+            
 
-        #Judge the quality of the final k values
-
-
-
-        #Print data
-        print("each image's mean color values : ")
-        print(self.testing_data)
-        print(self.testing_data.shape)
-
-        print("kvalues : ")
-        print(self.kValues)
-        print(self.kValues.shape)
-
-        #output shows a lot of/ all items in the same cluster- maybe once update k will help adjust?
-        print ("clusters from clusterAssignments  :")
-        print(self.clusters) 
-        print(len(self.clusters))
 
         return
     
     def clusterAssignments(self):#For the length of the data go through it, determin euclidean distance from each k value, and assign it to the closest k value
         result = [[] for i in range(self.kCount)] #List comprehension for dynamically assigning clusters
        
+        print("kvalues")
+        print(self.kValues.shape)
+
         mean = numpy.mean(self.testing_data, axis = 0)
-        centroids = mean.reshape((1,3)) + self.kValues
+        centroids = mean.reshape((1,3)) + self.kValues.reshape(self.kCount,3)
+       
 
         #print statments can be deleted - just for testing
         print("centroids: ")
         print(centroids)
  
         for i in self.testing_data:
-            result= numpy.append(result, numpy.argmin(numpy.sum((i.reshape((1,3))-centroids) ** 3, axis=1)))
+            result= numpy.append(result, numpy.argmin(numpy.sum((i.reshape((1,3))-centroids) ** 2, axis=0)))
        
-        result.reshape(50000, 1)
+        print("result")
+        print(result)
+        result.reshape(1, 50000)
+
+        self.kValues=centroids
+        
         return result
 
         
     def updateK(self): #Moving the position of the k values to the centre of the mean of each cluster
-        result = [[] for i in range(self.kCount)]
+        #result = [[] for i in range(self.kCount)]
+        result=[]
 
-        #what I have so far but currently not working - still trying but if anyone has suggestions
-        for i in range(len(self.clusters)):
-            result= numpy.append(result, numpy.mean([self.testing_data[x] for x in range(len(self.testing_data)) if self.clusters[x] == i], axis=0))
+        #for each cluster point, find the mean (center point) of that data - update list of clusters
+        for i in range(self.kCount):
+            count=0
+            
+            temp=[]
+            for x in range (len(self.testing_data)):
+                if(self.clusters[x] == i):
+                    count=count+1                 
+                    temp=numpy.append(temp,self.testing_data[x]) 
+                    
+            #if this cluster contains any nearby data points
+            if(count):
+                temp=temp.reshape(count, 3)
+                mean = numpy.mean(temp, axis = 0)
 
-        return self.kValues
-    
+            
+            #otherwise were just going to re-use original cluser (fornow - need to fix clusterassignment function)
+            else:
+                mean=self.kValues[i]
+ 
+
+            print("mean at : ", i)
+            print(mean) 
+            result=numpy.append(result, mean) 
+                
+        result=result.reshape(self.kCount,3)
+
+        #print statments for testing- can be deleted
+        print("kcount : ")
+        print(self.kCount)
+        print("result")
+        print(result.shape)
+        print(result)
+
+        return result
+
     def plotter(self):
         for i in range(self.kCount): #Plots a multi demensional graph of the clusters
             temp = numpy.asarray(self.clusters[i])
@@ -155,5 +198,5 @@ if __name__ == '__main__':
     trainingData, trainingLabels = readTrainingData(FILEPATH)
     testingData, testingLabels = readTestingData(FILEPATH)
  
-    kMeans = Kmeans(5,5,trainingData)#Clusters, rounds, non-labeled data.
+    kMeans = Kmeans(10,5,trainingData)#Clusters, rounds, non-labeled data.
     kMeans.run()
