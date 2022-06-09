@@ -91,19 +91,29 @@ def printOne(Chosen, label, directory):
     img = trainData
     dataLabel = trainLabels[Chosen]
     img = img.reshape(50000,3,32,32).transpose(0,2,3,1)
-    plt.imshow(img[Chosen:Chosen+1][0])
-    plt.savefig("Results/"+str(directory)+"/"+str(label) + '.png')
+    #plt.imshow(img[Chosen:Chosen+1][0])
+    #plt.savefig("Results/"+str(directory)+"/"+str(label) + '.png')
+    return img[Chosen:Chosen+1][0]
     #print(trainData[0])
     #print(cifarClasses[dataLabel])
 
 def printClass(selected,sample):
     c = 0;
     acc = 0;
+    plt.figure(figsize=(5,5))
     while(c < sample):
+        plt.subplot(5,5,c+1)
+        plt.xticks([])
+        plt.yticks([])
+        plt.grid(False)
+        
         x = np.random.randint(len(testingConfusionResults))
-        if(testingConfusionResults[x] == selected and c < 10):
+        if(testingConfusionResults[x] == selected and c < 25):
+            
             label = "Predicted"+str(selected)+"I"+str(c)+"_Class"+str(testingConfusionLabels[x])
-            printOne(x,label, selected)
+            plt.imshow(printOne(x,label,selected))
+            plt.xlabel(cifarClasses[testingConfusionLabels[x]])
+            #printOne(x,label, selected)
             c += 1
             if(testingConfusionLabels[x] == testingConfusionResults[x]):
                 acc += 1
@@ -114,6 +124,7 @@ def printClass(selected,sample):
     #        c += 1
     #        if(testingConfusionLabels[i] == testingConfusionResults[i]):
     #            acc += 1
+    plt.savefig("Results/Class"+str(selected)+".png")
     print("Accuracy for class "+str(selected)+", "+str(cifarClasses[selected])+": "+str(acc/c))
             
 def experiment1():
@@ -131,15 +142,15 @@ def experiment1():
         accuracy, inToHidden, hiddenToOut, prevIn, prevOut = runEpoch(inToHidden, hiddenToOut, prevIn, prevOut, LEARNINGRATE, MOMENTUM, False)
         print("Epoch: " + str(i) + " Accuracy: " + str(accuracy))
     print(confusion_matrix(testingConfusionLabels, testingConfusionResults))
-    printClass(0,10)
-    printClass(1,10)
-    printClass(2,10)
-    printClass(3,10)
-    printClass(4,10)
-    printClass(5,10)
-    printClass(6,10)
-    printClass(7,10)
-    printClass(8,10)
-    printClass(9,10)
+    printClass(0,25)
+    printClass(1,25)
+    printClass(2,25)
+    printClass(3,25)
+    printClass(4,25)
+    printClass(5,25)
+    printClass(6,25)
+    printClass(7,25)
+    printClass(8,25)
+    printClass(9,25)
         
 experiment1() 
