@@ -45,8 +45,9 @@ def readTestingData(pathToData):
 
 
 class Kmeans():
-    def __init__(self, k, rounds, data):
+    def __init__(self, k, rounds, data, labels):
         self.testing_data = data
+        self.labels=labels
         self.kCount = k #Number of clusters
         self.rounds = rounds #Number of rounds to run the algorithm
         self.kValues = [] 
@@ -77,70 +78,27 @@ class Kmeans():
         #Running the algorithm for the number of rounds, updating the K values to the mean of each cluster then cluster assignments
         #Keep track of past k values so we can plot the convergence and the final/best k values depending on the square error or however we judge it
        
-
         #Then plot.
         for i in range(self.rounds): 
 
            
             self.pastK.append(self.kValues) #Storing the initial k values
             self.clusters = self.clusterAssignments() # Assign initial clusters
-            #  ~ Needs work 
             self.kValues = self.updateK()
 
             #Judge the quality of the final k values
 
-            #Print data
-            print("each image's mean color values : ")
-            print(self.testing_data)
-            print(self.testing_data.shape)
+            #DISPLAY - uncomment ? 
+            #self.display()
 
-            print("kvalues : ")
-            print(self.kValues)
-            print(self.kValues.shape)
-
-            #output shows a lot of/ all items in the same cluster- maybe once update k will help adjust?
-            print ("clusters from clusterAssignments  :")
-            print(self.clusters) 
-            print(len(self.clusters))
-
-            #converting self.clusters into array(length kcount), with each index containing all the data
-            #points under a given cluster
-            count=[]
-            res=[]
-            for i in range(self.kCount):
-                temp=[]
-                counter=0
-                #for x in self.clusters:
-                for x, v in enumerate(self.clusters):
-                    if(v == i):
-                        temp.append(self.testing_data[x])
-                        counter=counter +1
-                        
-                #print(" at ", i , ":  ", temp)
-                res.append(temp)
-                count.append(counter)
-
-
-            temp=self.clusters
-            self.clusters=res
-            self.plotter()
-            self.clusters=temp
+            self.calling_plotter()
             
-            #these scatter plot lines are just for testing until I can get my code working with the preexisting plotter function
-            #AKA - can be deleted and replaced w plotter func. later
         return
     
     def clusterAssignments(self):#For the length of the data go through it, determin euclidean distance from each k value, and assign it to the closest k value
         result = [[] for i in range(self.kCount)] #List comprehension for dynamically assigning clusters
        
-        print("kvalues")
-        print(self.kValues.shape)
-
-       # mean = numpy.mean(self.testing_data, axis = 0)
-        #print(mean)
-        #centroids = mean.reshape((1,3)) + (self.kValues.reshape(self.kCount,3))
         centroids=self.kValues
-        print(centroids)
         centroids=centroids.astype(int)
         self.testing_data.astype(int)
  
@@ -159,11 +117,7 @@ class Kmeans():
                     clust= x
 
             result= numpy.append(result,clust)
-
-            #result= numpy.append(result, numpy.argmin(numpy.sum((i.reshape((1,3))-centroids) ** 2, axis=0)))
-       
-        print("result")
-        print(result)
+  
         result.reshape(50000,1)
 
         self.kValues=centroids
@@ -172,49 +126,68 @@ class Kmeans():
 
         
     def updateK(self): #Moving the position of the k values to the centre of the mean of each cluster
-        #result = [[] for i in range(self.kCount)]
+    
         result=[]
 
         #for each cluster point, find the mean (center point) of that data - update list of clusters
+        res=[]
         for i in range(self.kCount):
-            count=0
-            
             temp=[]
-            for x in range (len(self.testing_data)):
-                if(self.clusters[x] == i):
-                    count=count+1                 
-                    temp=numpy.append(temp,self.testing_data[x]) 
-                    
-            #if this cluster contains any nearby data points
-            if(count):
-                temp=temp.reshape(count, 3)
-                mean = numpy.mean(temp, axis = 0)
+            counter=0
+            
+            for x, v in enumerate(self.clusters):
+                if(v == i):
+                    temp.append(self.testing_data[x])
+                    counter=counter +1
+                        
+      
+            mean=numpy.mean(temp, axis=0)
 
-            #otherwise were just going to re-use original cluser (fornow - need to fix clusterassignment function)
-            else:
-                mean=self.kValues[i]
- 
-            result=numpy.append(result, mean) 
-                
+            result=numpy.append(result, mean)        
         result=result.reshape(self.kCount,3)
 
         return result
 
+    def calling_plotter(self):
+        #converting self.clusters into array(length kcount), with each index containing all the data
+            #points under a given cluster
+            count=[]
+            res=[]
+            for i in range(self.kCount):
+                temp=[]
+                counter=0
+                #for x in self.clusters:
+                for x, v in enumerate(self.clusters):
+                    if(v == i):
+                        temp.append(self.testing_data[x])
+                        counter=counter +1
+                        
+                res.append(temp)
+                count.append(counter)
+
+
+            temp=self.clusters
+            self.clusters=res
+            self.plotter()
+            self.clusters=temp
+
 
     def plotter(self):
+
         #next 2 lines make it 3d - delete to make 2d again
-        #fig = plt.figure()
-        #ax = fig.add_subplot(111, projection ='3d')
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection ='3d')
+
         for i in range(self.kCount): #Plots a multi demensional graph of the clusters
             if(self.clusters[i]):
 
                 temp = numpy.asarray(self.clusters[i])
 
                 #to make 2d- delete next 2 lines + uncomment 2 below
-                #ax.scatter(temp.T[0],temp.T[1], temp.T[2], cmap=plt.get_cmap(name=None, lut=None)) #Assigning colors to the clusters
-                #ax.scatter(self.kValues.T[0],self.kValues.T[1], self.kValues.T[2], c='black')
-                plt.scatter(temp.T[0],temp.T[1], cmap=plt.get_cmap(name=None, lut=None)) #Assigning colors to the clusters
-                plt.scatter(self.kValues.T[0],self.kValues.T[1], c='black')
+                ax.scatter(temp.T[0],temp.T[1], temp.T[2], cmap=plt.get_cmap(name=None, lut=None)) #Assigning colors to the clusters
+                ax.scatter(self.kValues.T[0],self.kValues.T[1], self.kValues.T[2], c='black')
+                #plt.scatter(temp.T[0],temp.T[1], cmap=plt.get_cmap(name=None, lut=None)) #Assigning colors to the clusters
+                #plt.scatter(self.kValues.T[0],self.kValues.T[1], c='black')
 
         plt.show()
         plt.savefig('temp.png')
@@ -223,9 +196,25 @@ class Kmeans():
     def square(self):#Squares by going through each k value and summing the square of the distance from each k value to the mean of the cluster, might want to do something else.
         return 0
 
+    def display(self):
+        #Print data
+        print("each image's mean color values : ")
+        print(self.testing_data)
+        print(self.testing_data.shape)
+
+        print("kvalues : ")
+        print(self.kValues)
+        print("size : ", self.kValues.shape)
+
+            #output shows a lot of/ all items in the same cluster- maybe once update k will help adjust?
+        print ("clusters from clusterAssignments  :")
+        print(self.clusters) 
+        print(len(self.clusters))    
+
+
 if __name__ == '__main__':
     trainingData, trainingLabels = readTrainingData(FILEPATH)
     testingData, testingLabels = readTestingData(FILEPATH)
  
-    kMeans = Kmeans(5,5,trainingData)#Clusters, rounds, non-labeled data.
+    kMeans = Kmeans(10,10,trainingData,trainingLabels)#Clusters, rounds, non-labeled data.
     kMeans.run()
