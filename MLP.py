@@ -8,7 +8,7 @@ HIDDEN4 = 100
 HIDDEN5 = 75
 LEARNINGRATE = 0.01
 EPOCHS = 100
-MOMENTUM = 0.9
+MOMENTUM = 0.5
 BIAS = 1
 
 dataset1 = np.load('cifar-10-batches-py/data_batch_1', allow_pickle=True, encoding='bytes')

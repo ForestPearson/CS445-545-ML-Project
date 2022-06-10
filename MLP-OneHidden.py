@@ -4,10 +4,10 @@ from sklearn.metrics import confusion_matrix
 import sys
 np.set_printoptions(threshold=sys.maxsize)
 
-HIDDENUNITS = 100
+HIDDENUNITS = 175
 LEARNINGRATE = 0.01
-EPOCHS = 100
-MOMENTUM = 0.9
+EPOCHS = 25
+MOMENTUM = 0.5
 BIAS = 1
 cifarClasses = ['airplane', 'automobile', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
 dataset1 = np.load('cifar-10-batches-py/data_batch_1', allow_pickle=True, encoding='bytes')
@@ -110,17 +110,17 @@ def printClass(selected,sample):
             c += 1
             if(testingConfusionLabels[x] == testingConfusionResults[x]):
                 acc += 1
+    plt.subplots_adjust(left=0, right=1, top=1, bottom=0.1, hspace=0.5, wspace=0.5)
     plt.savefig("Results/Class"+str(selected)+".png")
     print("Accuracy for class "+str(selected)+", "+str(cifarClasses[selected])+": "+str(acc/c))
             
 def experiment1():
-    printOne(1, "test", 42)
     inToHidden = randWeightMatrix(3073, HIDDENUNITS + 1)
     hiddenToOut = randWeightMatrix(HIDDENUNITS + 1, 10)
     prevIn = np.zeros((3073, HIDDENUNITS + 1))
     prevOut = np.zeros((HIDDENUNITS + 1, 10))
 
-    for i in range(0, 1):
+    for i in range(0, EPOCHS):
         testingConfusionLabels.clear()
         testingConfusionResults.clear()
         accuracy, inToHidden, hiddenToOut, prevIn, prevOut = runEpoch(inToHidden, hiddenToOut, prevIn, prevOut, LEARNINGRATE, MOMENTUM, True)
