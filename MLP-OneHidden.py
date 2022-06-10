@@ -91,11 +91,7 @@ def printOne(Chosen, label, directory):
     img = trainData
     dataLabel = trainLabels[Chosen]
     img = img.reshape(50000,3,32,32).transpose(0,2,3,1)
-    #plt.imshow(img[Chosen:Chosen+1][0])
-    #plt.savefig("Results/"+str(directory)+"/"+str(label) + '.png')
     return img[Chosen:Chosen+1][0]
-    #print(trainData[0])
-    #print(cifarClasses[dataLabel])
 
 def printClass(selected,sample):
     c = 0;
@@ -105,25 +101,15 @@ def printClass(selected,sample):
         plt.subplot(5,5,c+1)
         plt.xticks([])
         plt.yticks([])
-        plt.grid(False)
-        
+        plt.grid(False) 
         x = np.random.randint(len(testingConfusionResults))
         if(testingConfusionResults[x] == selected and c < 25):
-            
             label = "Predicted"+str(selected)+"I"+str(c)+"_Class"+str(testingConfusionLabels[x])
-            plt.imshow(printOne(x,label,selected))
+            plt.imshow(printOne(x,label,selected))#Calls printOne to get the image location
             plt.xlabel(cifarClasses[testingConfusionLabels[x]])
-            #printOne(x,label, selected)
             c += 1
             if(testingConfusionLabels[x] == testingConfusionResults[x]):
                 acc += 1
-    #for i in range(0, len(testingConfusionLabels)):
-    #   if(testingConfusionResults[i] == selected and c < 10):
-    #        label = "Predicted"+str(selected)+"I"+str(c)+"_Class"+str(testingConfusionLabels[i])
-    #        printOne(i,label, selected)
-    #        c += 1
-    #        if(testingConfusionLabels[i] == testingConfusionResults[i]):
-    #            acc += 1
     plt.savefig("Results/Class"+str(selected)+".png")
     print("Accuracy for class "+str(selected)+", "+str(cifarClasses[selected])+": "+str(acc/c))
             
